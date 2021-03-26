@@ -9,8 +9,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TransactionsController {
 
+    private final TransactionsService transactionsService;
+
+    public TransactionsController(TransactionsService transactionsService) {
+        this.transactionsService = transactionsService;
+    }
+
     @PostMapping("/transactions")
     public ResponseEntity postTransactions(@RequestBody TransactionDTO transactionDTO) {
+
+        transactionsService.registerTransaction(transactionDTO.getAmount(), transactionDTO.getTimestamp());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
