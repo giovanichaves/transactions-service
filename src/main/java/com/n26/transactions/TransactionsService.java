@@ -8,9 +8,23 @@ import java.time.ZonedDateTime;
 @Service
 public class TransactionsService {
 
+    private final TransactionsRepository transactionsRepository;
+
+    public TransactionsService(TransactionsRepository transactionsRepository) {
+        this.transactionsRepository = transactionsRepository;
+    }
+
     public void registerTransaction(BigDecimal amount, ZonedDateTime timestamp) {
         if (timestamp.isBefore(ZonedDateTime.now().minusMinutes(1))) {
             throw new TransactionTooOldException(amount, timestamp);
         }
+
+        var bucketNum = timestamp.getSecond();
+
+        transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, secondBucket) -> {
+            secondBucket.addTransaction(amount);
+
+            return secondBucket;
+        });
     }
 }

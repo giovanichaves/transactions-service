@@ -1,7 +1,10 @@
 package com.n26.transactions;
 
+import lombok.Getter;
+
 import java.math.BigDecimal;
 
+@Getter
 public class TransactionBucket {
 
     private BigDecimal sum = BigDecimal.ZERO;
