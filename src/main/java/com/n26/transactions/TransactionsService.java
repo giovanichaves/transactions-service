@@ -21,10 +21,18 @@ public class TransactionsService {
 
         var bucketNum = timestamp.getSecond();
 
-        transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, secondBucket) -> {
-            secondBucket.addTransaction(amount);
+        synchronized (this) {
+            transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, secondBucket) -> {
+                secondBucket.addTransaction(amount);
 
-            return secondBucket;
-        });
+                return secondBucket;
+            });
+        }
+    }
+
+    public void deleteTransactions() {
+        synchronized (this) {
+            transactionsRepository.getLastMinuteBuckets().forEach((integer, transactionBucket) -> transactionBucket.resetBucket());
+        }
     }
 }
