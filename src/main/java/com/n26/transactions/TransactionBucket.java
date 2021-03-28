@@ -12,11 +12,12 @@ public class TransactionBucket {
     private BigDecimal min = null;
     private long count = 0;
 
-    public void addTransaction(BigDecimal amount) {
+    public TransactionBucket addTransaction(BigDecimal amount) {
         this.sum = this.sum.add(amount);
         this.max = this.max.max(amount);
         this.min = this.min == null ? amount : this.min.min(amount);
         this.count++;
+        return this;
     }
 
     public void resetBucket() {

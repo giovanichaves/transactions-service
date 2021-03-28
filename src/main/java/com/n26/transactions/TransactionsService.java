@@ -26,11 +26,7 @@ public class TransactionsService {
         var bucketNum = timestamp.getSecond();
 
         synchronized (this) {
-            transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, secondBucket) -> {
-                secondBucket.addTransaction(amount);
-
-                return secondBucket;
-            });
+            transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, secondBucket) -> secondBucket.addTransaction(amount));
         }
     }
 
