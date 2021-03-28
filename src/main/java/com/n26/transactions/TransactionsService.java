@@ -19,6 +19,10 @@ public class TransactionsService {
             throw new TransactionTooOldException(amount, timestamp);
         }
 
+        if (timestamp.isAfter(ZonedDateTime.now())) {
+            throw new TransactionInTheFutureException(amount, timestamp);
+        }
+
         var bucketNum = timestamp.getSecond();
 
         synchronized (this) {

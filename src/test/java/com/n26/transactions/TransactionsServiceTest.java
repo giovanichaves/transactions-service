@@ -35,10 +35,18 @@ class TransactionsServiceTest {
     }
 
     @Test
-    @DisplayName("Throw exception is transaction timestamp is too old")
+    @DisplayName("Throw exception if transaction timestamp is too old")
     void failsWhenTransactionTooOld() {
         Assertions.assertThrows(TransactionTooOldException.class, () -> {
             transactionsService.registerTransaction(BigDecimal.TEN, ZonedDateTime.now().minusMinutes(2));
+        });
+    }
+
+    @Test
+    @DisplayName("Throw exception if transaction timestamp is in the future")
+    void failsWhenTransactionInTheFuture() {
+        Assertions.assertThrows(TransactionInTheFutureException.class, () -> {
+            transactionsService.registerTransaction(BigDecimal.TEN, ZonedDateTime.now().plusSeconds(2));
         });
     }
 
@@ -72,6 +80,5 @@ class TransactionsServiceTest {
 
         biconsumerCaptor.getValue().accept(null, bucket);
         verify(bucket).resetBucket();
-
     }
 }
