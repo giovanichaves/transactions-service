@@ -1,24 +1,31 @@
 package com.n26;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.n26.transactions.TransactionInTheFutureException;
 import com.n26.transactions.TransactionTooOldException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class ErrorAdvice extends ResponseEntityExceptionHandler {
+public class ErrorAdvice {
 
     @ExceptionHandler(TransactionInTheFutureException.class)
-    ResponseEntity transactionInTheFutureError() {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-    }
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    void transactionInTheFutureError() {}
 
     @ExceptionHandler(TransactionTooOldException.class)
-    ResponseEntity transactionTooOldError() {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void transactionTooOldError() {}
+
+    @ExceptionHandler(InvalidFormatException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    void invalidFormatException() {}
+
+    @ExceptionHandler(JsonParseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    void httpMessageNotReadableException() {}
 
 }
