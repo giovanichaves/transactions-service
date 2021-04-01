@@ -7,11 +7,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StatisticsController {
 
+    private final StatisticsService statisticsService;
+
+    public StatisticsController(StatisticsService statisticsService) {
+        this.statisticsService = statisticsService;
+    }
+
     @GetMapping("/statistics")
     public ResponseEntity getStatistics() {
 
+        var stats = statisticsService.retrieveStatistics();
+
         return ResponseEntity
                 .ok()
-                .build();
+                .body(stats);
     }
 }

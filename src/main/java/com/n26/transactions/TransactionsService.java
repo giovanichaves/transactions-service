@@ -24,15 +24,14 @@ public class TransactionsService {
         }
 
         var bucketNum = timestamp.getSecond();
-
-        synchronized (this) {
-            transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, secondBucket) -> secondBucket.addTransaction(amount));
+        synchronized (this.transactionsRepository) {
+            this.transactionsRepository.getLastMinuteBuckets().compute(bucketNum, (i, bucket) -> bucket.addTransaction(amount));
         }
     }
 
     public void deleteTransactions() {
-        synchronized (this) {
-            transactionsRepository.getLastMinuteBuckets().forEach((integer, transactionBucket) -> transactionBucket.resetBucket());
+        synchronized (this.transactionsRepository) {
+            this.transactionsRepository.getLastMinuteBuckets().forEach((i, bucket) -> bucket.resetBucket());
         }
     }
 }
