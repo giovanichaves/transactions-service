@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -29,16 +28,18 @@ class TransactionsServiceTest {
     @Mock
     private ConcurrentHashMap<Integer, TransactionBucket> buckets;
 
+    private UTCTimeProvider timeProvider = new UTCTimeProvider();
+
     @BeforeEach
     void setUp() {
-        transactionsService = new TransactionsService(transactionsRepository);
+        this.transactionsService = new TransactionsService(this.transactionsRepository, this.timeProvider);
     }
 
     @Test
     @DisplayName("Throw exception if transaction timestamp is too old")
     void failsWhenTransactionTooOld() {
         Assertions.assertThrows(TransactionTooOldException.class, () -> {
-            transactionsService.registerTransaction(BigDecimal.TEN, ZonedDateTime.now().minusMinutes(2));
+            this.transactionsService.registerTransaction(BigDecimal.TEN, this.timeProvider.now().minusMinutes(2));
         });
     }
 
@@ -46,22 +47,21 @@ class TransactionsServiceTest {
     @DisplayName("Throw exception if transaction timestamp is in the future")
     void failsWhenTransactionInTheFuture() {
         Assertions.assertThrows(TransactionInTheFutureException.class, () -> {
-            transactionsService.registerTransaction(BigDecimal.TEN, ZonedDateTime.now().plusSeconds(2));
+            this.transactionsService.registerTransaction(BigDecimal.TEN, this.timeProvider.now().plusSeconds(2));
         });
     }
 
     @Test
     @DisplayName("Adds the transaction amount to the correct bucket")
     void addsTransactionToCorrectBucket() {
-        when(transactionsRepository.getLastMinuteBuckets()).thenReturn(buckets);
+        when(this.transactionsRepository.getLastMinuteBuckets()).thenReturn(this.buckets);
 
-        var now = ZonedDateTime.now();
-        var transactionTimestamp = now.minusSeconds(5);
-        transactionsService.registerTransaction(BigDecimal.TEN, transactionTimestamp);
+        var transactionTimestamp = this.timeProvider.now().minusSeconds(5);
+        this.transactionsService.registerTransaction(BigDecimal.TEN, transactionTimestamp);
         var bifunctionCaptor = ArgumentCaptor.forClass(BiFunction.class);
         var bucket = mock(TransactionBucket.class);
 
-        verify(transactionsRepository.getLastMinuteBuckets()).compute(eq(transactionTimestamp.getSecond()), bifunctionCaptor.capture());
+        verify(this.transactionsRepository.getLastMinuteBuckets()).compute(eq(transactionTimestamp.getSecond()), bifunctionCaptor.capture());
 
         bifunctionCaptor.getValue().apply(null, bucket);
         verify(bucket).addTransaction(BigDecimal.TEN);
@@ -70,13 +70,13 @@ class TransactionsServiceTest {
     @Test
     @DisplayName("Deletes all transactions from repository")
     void deletesAllTransactions() {
-        when(transactionsRepository.getLastMinuteBuckets()).thenReturn(buckets);
+        when(this.transactionsRepository.getLastMinuteBuckets()).thenReturn(this.buckets);
 
-        transactionsService.deleteTransactions();
+        this.transactionsService.deleteTransactions();
         var biconsumerCaptor = ArgumentCaptor.forClass(BiConsumer.class);
         var bucket = mock(TransactionBucket.class);
 
-        verify(transactionsRepository.getLastMinuteBuckets()).forEach(biconsumerCaptor.capture());
+        verify(this.transactionsRepository.getLastMinuteBuckets()).forEach(biconsumerCaptor.capture());
 
         biconsumerCaptor.getValue().accept(null, bucket);
         verify(bucket).resetBucket();

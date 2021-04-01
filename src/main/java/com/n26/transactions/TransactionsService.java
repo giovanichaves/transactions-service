@@ -9,17 +9,21 @@ import java.time.ZonedDateTime;
 public class TransactionsService {
 
     private final TransactionsRepository transactionsRepository;
+    private final UTCTimeProvider timeProvider;
 
-    public TransactionsService(TransactionsRepository transactionsRepository) {
+    public TransactionsService(TransactionsRepository transactionsRepository, UTCTimeProvider timeProvider) {
         this.transactionsRepository = transactionsRepository;
+        this.timeProvider = timeProvider;
     }
 
     public void registerTransaction(BigDecimal amount, ZonedDateTime timestamp) {
-        if (timestamp.isBefore(ZonedDateTime.now().minusMinutes(1))) {
+        var now = this.timeProvider.now();
+
+        if (timestamp.isBefore(now.minusSeconds(59))) {
             throw new TransactionTooOldException(amount, timestamp);
         }
 
-        if (timestamp.isAfter(ZonedDateTime.now())) {
+        if (timestamp.isAfter(now)) {
             throw new TransactionInTheFutureException(amount, timestamp);
         }
 
