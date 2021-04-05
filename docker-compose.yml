@@ -1,0 +1,15 @@
+version: '2'
+services:
+  n26challenge:
+    container_name: n26challenge
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: n26challenge:latest
+    ports:
+      - 8080:8080
+    networks:
+      - spring-cloud-network
+networks:
+  spring-cloud-network:
+    driver: bridge
