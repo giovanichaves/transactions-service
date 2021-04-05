@@ -52,7 +52,7 @@ class TransactionsServiceTest {
     }
 
     @Test
-    @DisplayName("Adds the transaction amount to the correct bucket")
+    @DisplayName("Check if calls add method in the correct bucket from repository")
     void addsTransactionToCorrectBucket() {
         when(this.transactionsRepository.getLastMinuteBuckets()).thenReturn(this.buckets);
 
@@ -68,7 +68,7 @@ class TransactionsServiceTest {
     }
 
     @Test
-    @DisplayName("Deletes all transactions from repository")
+    @DisplayName("Check if calls reset method in each bucket in the repository")
     void deletesAllTransactions() {
         when(this.transactionsRepository.getLastMinuteBuckets()).thenReturn(this.buckets);
 
